@@ -7,10 +7,10 @@ export interface Job {
   persist: boolean;
 }
 
-export interface JobMetadata {
-  name: string;
-  status: 'pending' | 'running' | 'completed' | 'failed';
-  lastRunTime: Date | null;
-  nextRunTime: Date | null;
-  retryCount: number;
-}
+// export interface JobMetadata {
+//   name: string;
+//   status: 'pending' | 'running' | 'completed' | 'failed';
+//   lastRunTime: Date | null;
+//   nextRunTime: Date | null;
+//   retryCount: number;
+// }

@@ -3,6 +3,7 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JobMetadata } from './schedular/jobMetadata.entity';
 
 @Module({
   imports: [
@@ -17,8 +18,8 @@ import { TypeOrmModule } from '@nestjs/typeorm';
       port: 3306,
       username: 'root',
       password: 'newpassword',
-      database: 'marlin',
-      entities: [],
+      database: 'schedular',
+      entities: [JobMetadata],
       synchronize: true,
     }),
   ],
