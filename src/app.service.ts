@@ -1,49 +1,49 @@
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { SchedulerService } from './schedular/schedular.service';
+import { Job } from './schedular/interface';
 
 @Injectable()
 export class AppService implements OnModuleInit {
-  constructor(private readonly schedulerService: SchedulerService) { }
+  constructor(private readonly schedulerService: SchedulerService) {}
 
   onModuleInit() {
     this.setupJobs();
   }
 
   setupJobs() {
+    const Job1: Partial<Job> = {
+      name: 'Job A',
+      retryDelay: 6000,
+      interval: 6000,
+      task: async () => {
+        console.log('Job A running');
+      },
+      maxRetries: 3,
+      timeout: 100,
+    };
 
-    //   this.schedulerService.addJob({
-    //     name: 'Job A',
-    //     interval: 60000, // 1 minute
-    //     task: async () => {
-    //       console.log('Job A running');
-    //     },
-    //     timeout: 100,
-    //     persist: true, 
-    //   });
+    const Job2: Partial<Job> = {
+      name: 'Job B',
+      interval: 60000,
+      task: async () => {
+        console.log('Job B running');
+        await new Promise((resolve) => setTimeout(resolve, 20000));
+        console.log('Job B heavy operation completed');
+      },
+    };
 
-
-    //   this.schedulerService.addJob({
-    //     name: 'Job B',
-    //     interval: 60000, // 1 minute
-    //     task: async () => {
-    //       console.log('Job B running');
-    //       // Simulate a time-consuming operation
-    //       await new Promise(resolve => setTimeout(resolve, 20000));
-    //       console.log('Job B heavy operation completed');
-    //     },
-    //     persist: true,
-    //   });
-
-    //   // Job C: Runs every 5 minutes and logs
-    //   this.schedulerService.addJob({
-    //     name: 'Job C',
-    //     interval: 300000, // 5 minutes
-    //     task: async () => {
-    //       console.log('Job C running');
-    //     },
-    //     persist: true,
-    //   });
-    // }
+    const Job3: Partial<Job> = {
+      name: 'Job C',
+      interval: 60000, // 1 minute
+      task: async () => {
+        console.log('Job C running');
+        await new Promise((resolve) => setTimeout(resolve, 20000));
+        console.log('Job C heavy operation completed');
+      },
+    };
+    this.schedulerService.addJob(Job1);
+    this.schedulerService.addJob(Job2);
+    this.schedulerService.addJob(Job3);
   }
 
   getHello(): string {

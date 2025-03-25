@@ -24,6 +24,6 @@ export class JobMetadata {
   @CreateDateColumn({ default: null })
   nextRunTime: Date;
 
-  @UpdateDateColumn()
+  @Column()
   retryCount: number;
 }

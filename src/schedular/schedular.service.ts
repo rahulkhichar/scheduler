@@ -5,28 +5,19 @@ import { JobMetaDataRepository } from './repository';
 import { JobMetadata } from './jobMetadata.entity';
 import { JobStatus } from './enum';
 
-
 @Injectable()
 export class SchedulerService {
+  constructor(private readonly jobMetadataRepository: JobMetaDataRepository) {}
 
-  constructor(private readonly jobMetadataRepository: JobMetaDataRepository) { }
-
-
-  addJob(job: Job): void {
+  addJob(job: Partial<Job>): void {
     this.scheduleJob(job);
   }
-
-
-
-
 
   private async getJobMetadata(jobName: string): Promise<JobMetadata | null> {
     return await this.jobMetadataRepository.findJob({
       where: { name: jobName },
     });
-
   }
-
 
   private async updateJobMetadata(
     jobName: string,
@@ -43,11 +34,8 @@ export class SchedulerService {
         id: jobMetadata.id,
         ...updates,
       });
-    } catch (error) {
-    }
+    } catch (error) {}
   }
-
-
 
   private async createJobMetadata(
     jobName: string,
@@ -62,16 +50,12 @@ export class SchedulerService {
       ...initialData,
     };
     await this.jobMetadataRepository.createJobMetadata(jobMetaData);
-
   }
 
-
-  private async scheduleJob(job: Job): Promise<void> {
-
+  private async scheduleJob(job: Partial<Job>): Promise<void> {
     setInterval(async () => {
       await this.executeJob(job);
     }, job.interval);
-
 
     const metadata = await this.getJobMetadata(job.name);
     if (!metadata) {
@@ -80,13 +64,9 @@ export class SchedulerService {
         nextRunTime: new Date(Date.now() + job.interval),
       });
     }
-
-
   }
 
-
-  private async executeJob(job: Job): Promise<void> {
-
+  private async executeJob(job: Partial<Job>): Promise<void> {
     let jobCompleted = false;
 
     const nextRunTime = new Date(Date.now() + job.interval);
@@ -97,22 +77,23 @@ export class SchedulerService {
 
     const startTime = new Date();
 
-
     await this.updateJobMetadata(job.name, {
       lastRunTime: startTime,
     });
-
 
     const attemptExecution = async (): Promise<void> => {
       const executeWithTimeout = async () => {
         const timeout = new Promise<void>((resolve, reject) => {
           const id = setTimeout(() => {
             if (!jobCompleted) {
-              reject(new Error(`Job "${job.name}" timed out after ${job.timeout}ms`));
+              reject(
+                new Error(`Job "${job.name}" timed out after ${job.timeout}ms`),
+              );
             }
           }, job.timeout);
 
-          job.task()
+          job
+            .task()
             .then(() => {
               jobCompleted = true;
               clearTimeout(id);
@@ -135,15 +116,16 @@ export class SchedulerService {
           await this.updateJobMetadata(job.name, { retryCount: attempt + 1 });
 
           if (attempt < job.maxRetries) {
-            await new Promise(resolve => setTimeout(resolve, job.retryDelay));
+            await new Promise((resolve) => setTimeout(resolve, job.retryDelay));
           } else {
-            await this.updateJobMetadata(job.name, { status: JobStatus.FAILED });
+            await this.updateJobMetadata(job.name, {
+              status: JobStatus.FAILED,
+            });
           }
         }
       }
     };
 
     await attemptExecution();
-
   }
 }
