@@ -9,20 +9,19 @@ import { JobMetaDataRepository } from './schedular/repository';
 
 @Module({
   imports: [
-
     TypeOrmModule.forFeature([JobMetadata]),
     ConfigModule.forRoot({
       isGlobal: true,
-      envFilePath: `.env.${process.env.NODE_ENV}`,
+      envFilePath: `.env`,
     }),
 
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '127.0.0.1',
-      port: 3306,
-      username: 'root',
-      password: 'newpassword',
-      database: 'schedular',
+      host: process.env.DB_HOST,
+      port: +process.env.DB_PORT,
+      username: process.env.DB_USERNAME,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_DATABASE,
       entities: [JobMetadata],
       synchronize: true,
       extra: {
@@ -35,4 +34,4 @@ import { JobMetaDataRepository } from './schedular/repository';
   controllers: [AppController],
   providers: [AppService, SchedulerService, JobMetaDataRepository],
 })
-export class AppModule { }
+export class AppModule {}
