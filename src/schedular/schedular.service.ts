@@ -7,7 +7,7 @@ import { JobStatus } from './enum';
 
 @Injectable()
 export class SchedulerService {
-  constructor(private readonly jobMetadataRepository: JobMetaDataRepository) {}
+  constructor(private readonly jobMetadataRepository: JobMetaDataRepository) { }
 
   addJob(job: Partial<Job>): void {
     this.scheduleJob(job);
@@ -34,7 +34,7 @@ export class SchedulerService {
         id: jobMetadata.id,
         ...updates,
       });
-    } catch (error) {}
+    } catch (error) { }
   }
 
   private async createJobMetadata(
@@ -54,7 +54,7 @@ export class SchedulerService {
 
   private async scheduleJob(job: Partial<Job>): Promise<void> {
     setInterval(async () => {
-      await this.executeJob(job);
+      this.executeJob(job);
     }, job.interval);
 
     const metadata = await this.getJobMetadata(job.name);
@@ -67,7 +67,9 @@ export class SchedulerService {
   }
 
   private async executeJob(job: Partial<Job>): Promise<void> {
+
     let jobCompleted = false;
+
 
     const nextRunTime = new Date(Date.now() + job.interval);
     await this.updateJobMetadata(job.name, {
@@ -86,6 +88,8 @@ export class SchedulerService {
         const timeout = new Promise<void>((resolve, reject) => {
           const id = setTimeout(() => {
             if (!jobCompleted) {
+
+              console.log(`Job "${job.name}" failed ${job.timeout}ms`);
               reject(
                 new Error(`Job "${job.name}" timed out after ${job.timeout}ms`),
               );
@@ -114,6 +118,7 @@ export class SchedulerService {
           return;
         } catch (error) {
           await this.updateJobMetadata(job.name, { retryCount: attempt + 1 });
+
 
           if (attempt < job.maxRetries) {
             await new Promise((resolve) => setTimeout(resolve, job.retryDelay));
